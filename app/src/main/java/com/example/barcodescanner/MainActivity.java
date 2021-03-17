@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -88,12 +89,15 @@ public class MainActivity extends AppCompatActivity {
     public void scanBarcode(Bitmap bitmap){
         TextView textView = findViewById(R.id.textView);
         InputImage image = InputImage.fromBitmap(bitmap, 0);
-        BarcodeScanner scanner = BarcodeScanning.getClient(options);
+        BarcodeScanner scanner = BarcodeScanning.getClient();
         Task<List<Barcode>> result = scanner.process(image)
                 .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
                     @Override
                     public void onSuccess(List<Barcode> barcodes) {
                         String barcodesString = "";
+                        if (barcodes == null){
+                            Log.i("scanStatus", "null");
+                        }
                         for (Barcode barcode: barcodes) {
                             String rawValue = barcode.getRawValue();
                             barcodesString += (rawValue + ", ");
