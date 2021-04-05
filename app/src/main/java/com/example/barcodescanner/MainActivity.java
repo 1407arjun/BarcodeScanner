@@ -89,29 +89,40 @@ public class MainActivity extends AppCompatActivity {
     public void scanBarcode(Bitmap bitmap){
         TextView textView = findViewById(R.id.textView);
         InputImage image = InputImage.fromBitmap(bitmap, 0);
-        BarcodeScanner scanner = BarcodeScanning.getClient();
-        Task<List<Barcode>> result = scanner.process(image)
-                .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
+        
+        TextRecognizer recognizer = TextRecognition.getClient();
+        Task<Text> result =
+        recognizer.process(image)
+                .addOnSuccessListener(new OnSuccessListener<Text>() {
                     @Override
-                    public void onSuccess(List<Barcode> barcodes) {
-                        String barcodesString = "";
-                        if (barcodes == null){
-                            Log.i("scanStatus", "null");
+                    public void onSuccess(Text visionText) {
+                       String resultText = result.getText();
+                        for (Text.TextBlock block : result.getTextBlocks()) {
+                            String blockText = block.getText();
+                            Point[] blockCornerPoints = block.getCornerPoints();
+                            Rect blockFrame = block.getBoundingBox();
+                            
+                            for (Text.Line line : block.getLines()) {
+                                String lineText = line.getText();
+                                Point[] lineCornerPoints = line.getCornerPoints();
+                                Rect lineFrame = line.getBoundingBox();
+                                
+                                for (Text.Element element : line.getElements()) {
+                                String elementText = element.getText();
+                                Point[] elementCornerPoints = element.getCornerPoints();
+                                Rect elementFrame = element.getBoundingBox();
+                                }     
+                            }
                         }
-                        for (Barcode barcode: barcodes) {
-                            String rawValue = barcode.getRawValue();
-                            barcodesString += (rawValue + ", ");
-                            Log.i("scanStatus", rawValue);
-                        }
-                        textView.setText(barcodesString);
+                        textView.setText(resultText);
                     }
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.i("scanStatus", "failed");
-                        textView.setText("Failed");
-                    }
-                });
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                printStackTrace(e);
+                            }
+                        });
     }
 }
